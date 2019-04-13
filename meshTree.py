@@ -32,9 +32,38 @@ for term in meshTermList:
 meshNumberList.sort()
  
 used_items = set()
+parentDic = {}
 for item in meshNumberList:
+    list = []
+    parentList = item.split('.')
+    parent = ''
+    if len(parentList) != 1:
+        for itr in parentList:
+            if parent == '':
+                parent += itr
+            else:
+                parent += '.' + itr           
+            if parent != item:
+                list.append(parent)            
+        parentDic[item] = parent
+            
+
     if numbers[item] not in used_items:
         print(numbers[item], '\n', item, file=outputFile)
+        print('parent:\n', file=outputFile);
+        if item in parentDic:
+            print(parentDic[item], file = outputFile)
         used_items.add(numbers[item])
     else:
         print(item, file=outputFile)
+        if item in parentDic:
+            for itr in parentDic[item]:
+                print(itr, file = outputFile)
+
+
+# item is number of each phrase and
+# numbers[item] is the term name of each number
+
+# to do
+# to complete a dic of parents of each term
+# and children of each term
