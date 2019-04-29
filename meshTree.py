@@ -7,7 +7,8 @@
 import re
 import os
 import copy
- 
+import treeModel
+
 terms = {}
 numbers = {}
  
@@ -68,16 +69,19 @@ for item in meshNumberList:
 # numbers[item] is the term name of current term number
 # parentDic[item] are all Ancestors of current term
 # childrenDic[item] are direct children of current term
+root = treeModel.Node(None, 'MeSH')
 for item in meshNumberList:
     if numbers[item] not in used_items:
         print(file = outputFile)
 
         print(numbers[item], '\n', item, file=outputFile)
-
+        
         print('Ancestors:', file=outputFile)
         if item in parentDic:
             print(parentDic[item], file = outputFile)
         else:
+            newNode = treeModel.Node(root, item)
+            root.children_list.append(newNode)
             print('No Ancestors', file = outputFile)
         
         print('children:', file=outputFile)
@@ -101,3 +105,27 @@ for item in meshNumberList:
             print(childrenDic[item], file = outputFile)
         else:
             print('No children', file = outputFile)
+
+# Store in a tree class
+def buildTree(node):
+    if node.node_name in childrenDic:
+        for childNode in childrenDic[node.node_name]:
+            newNode = treeModel.Node(node, childNode)
+            node.children_list.append(newNode)
+            buildTree(newNode)
+
+def changeName(node):
+    meshTree.node_list.append(node)
+    node.node_name = numbers[node.node_name]
+    if len(node.children_list) == 0:
+        return
+    for child in node.children_list:
+        changeName(child)
+
+meshTree = treeModel.Tree(root)
+for node in meshTree.root.children_list:
+    buildTree(node)
+    changeName(node)
+
+# print(meshTree.tree_dfs('Proteinase Inhibitory Proteins, Secretory'))
+print()
