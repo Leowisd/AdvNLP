@@ -1,5 +1,10 @@
 # Yifu Yao
-# 4/12/2019
+# Initiazation: 4/12/2019
+# Update: 4/29/2019
+# 
+# meshTree includes all mesh terms
+# diseasesTree includes only diseases terms
+# 
 # items in meshNumberList are term numbers
 # numbers[item] is the term name of current term number
 # parentDic[item] are all Ancestors of current term
@@ -69,7 +74,6 @@ for item in meshNumberList:
 # numbers[item] is the term name of current term number
 # parentDic[item] are all Ancestors of current term
 # childrenDic[item] are direct children of current term
-root = treeModel.Node(None, 'MeSH')
 for item in meshNumberList:
     if numbers[item] not in used_items:
         print(file = outputFile)
@@ -80,8 +84,6 @@ for item in meshNumberList:
         if item in parentDic:
             print(parentDic[item], file = outputFile)
         else:
-            newNode = treeModel.Node(root, item)
-            root.children_list.append(newNode)
             print('No Ancestors', file = outputFile)
         
         print('children:', file=outputFile)
@@ -106,7 +108,9 @@ for item in meshNumberList:
         else:
             print('No children', file = outputFile)
 
-# Store in a tree class
+# Build MeSH Tree and Diseases Tree
+# meshTree includes all mesh terms
+# diseasesTree includes only diseases terms
 def buildTree(node):
     if node.node_name in childrenDic:
         for childNode in childrenDic[node.node_name]:
@@ -122,10 +126,29 @@ def changeName(node):
     for child in node.children_list:
         changeName(child)
 
+def dfsDiseasesTree(node):
+    diseasesTree.node_list.append(node)
+    if (len(node.children_list) > 0):
+        for child in node.children_list:
+            dfsDiseasesTree(child)
+    return
+
+root = treeModel.Node(None, 'MeSH')
+for item in meshNumberList:
+    if item not in parentDic:
+        newNode = treeModel.Node(root, item)
+        root.children_list.append(newNode)
 meshTree = treeModel.Tree(root)
+root2 = treeModel.Node(None, 'Diseases')
+diseasesTree = treeModel.Tree(root2)
 for node in meshTree.root.children_list:
     buildTree(node)
+    if ('C' in node.node_name):
+        diseasesTree.root.children_list.append(node)
     changeName(node)
+dfsDiseasesTree(diseasesTree.root)
 
-# print(meshTree.tree_dfs('Proteinase Inhibitory Proteins, Secretory'))
+# TEST
+print(meshTree.tree_dfs('Proteinase Inhibitory Proteins, Secretory'))
+print(diseasesTree.tree_dfs('Heart Aneurysm'))
 print()
